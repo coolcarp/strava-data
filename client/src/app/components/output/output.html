@@ -1,0 +1,10 @@
+<div>
+    @for (item of state.results() | keyvalue; track item.key) { 
+        <p class="building"><a target="_blank" [href]="'https://www.openstreetmap.org/?mlat=' + item.value.lat + '&mlon=' + item.value.long + '#map=18/' + item.value.lat + '/' + item.value.long">{{item.value.name}}</a></p>
+        @for (room of item.value.room; track room.id) {
+            <p class="room">{{room.name}}</p>
+        }
+    } @empty {
+        <p>Select a location to get started!</p>
+    }
+</div>

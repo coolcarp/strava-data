@@ -1,0 +1,36 @@
+<form (submit)="onSubmit($event)">
+  <input id="useLocation" type="button" value="Use current location" (click)="onClickLocation($event)">
+
+  <label for="day">Day</label>
+  <select id="day" [field]="state.queryForm.day">
+    <option value="M" label="Monday (M)"></option>
+    <option value="T" label="Tuesday (T)"></option>
+    <option value="W" label="Wednesday (W)"></option>
+    <option value="TH" label="Thursday (TH)"></option>
+    <option value="F" label="Friday (F)"></option>
+    <option value="S" label="Saturday (S)"></option>
+  </select>
+
+  <label for="period">Period</label>
+  <select id="period" [field]="state.queryForm.period">
+    <option value="1"> 1 - 7:25 AM - 8:15 AM </option>
+    <option value="2"> 2 - 8:30 AM - 9:20 AM </option>
+    <option value="3"> 3 - 9:35 AM - 10:25 AM </option>
+    <option value="4"> 4 - 10:40 AM - 11:30 AM </option>
+    <option value="5"> 5 - 11:45 AM - 12:35 PM </option>
+    <option value="6"> 6 - 12:50 PM - 1:40 PM </option>
+    <option value="7"> 7 - 1:55 PM - 2:45 PM </option>
+    <option value="8"> 8 - 3:00 PM - 3:50 PM </option>
+    <option value="9"> 9 - 4:05 PM - 4:55 PM </option>
+    <option value="10"> 10 - 5:10 PM - 6:00 PM </option>
+    <option value="11"> 11 - 6:15 PM - 7:05 PM </option>
+    <option value="E1"> E1 - 7:20 PM - 8:10 PM </option>
+    <option value="E2"> E2 - 8:20 PM - 9:10 PM </option>
+    <option value="E3"> E3 - 9:20 PM - 10:10 PM </option>
+  </select>
+
+  <label for="roomCount">Minimum classroom count</label>
+  <input id="roomCount" type="number" [field]="state.queryForm.roomCount">
+
+  <input type="submit" value="FIND ROOMS">
+</form>

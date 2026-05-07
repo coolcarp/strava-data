@@ -1,0 +1,25 @@
+:host {
+    width: 100%;
+    display: flex;
+    flex-grow: 1;
+    overflow: auto;
+}
+
+:host div {
+    width: 100%;
+    margin: 0;
+    gap: 0.4rem;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 1rem;
+    overflow: auto;
+}
+
+p.building {
+    text-align: center;
+    font-weight: bold;
+    font-size: large;
+}
+
+p.room {
+    
+}

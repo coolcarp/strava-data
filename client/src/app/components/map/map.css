@@ -1,0 +1,9 @@
+:host {
+    flex-grow: 1;
+    height: 100vh;
+    background-color: lightgreen;
+}
+
+div {
+    height: 100%;
+}

@@ -1,0 +1,8 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    width: max(20vw, 300px);
+    border-right: 1px gray solid;
+    /* background-color: rgb(255, 255, 255); */
+    max-height: 100vh;
+}
