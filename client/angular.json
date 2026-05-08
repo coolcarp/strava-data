@@ -25,7 +25,7 @@
               "src/styles.css"
             ],
             "scripts": [
-              "node_modules/leaflet.heat/dist/leaflet-heat.js"
+              
             ]
           },
           "configurations": {

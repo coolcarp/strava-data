@@ -45,4 +45,9 @@ export class State {
   });
 
   public activityPoints = signal([]);
+
+  public totalActivities = signal(0);
+  public currentActivity = signal(0);
+
+  public transparency = signal(0.1);
 }

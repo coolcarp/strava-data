@@ -12,20 +12,23 @@ export class Map {
   private state = inject(State);
 
   private map: L.Map | undefined;
+  private currentLayerGroup: L.LayerGroup | undefined;
 
   constructor() {
     effect(() => {
-      console.log(this.state.activityPoints())
+      if (this.currentLayerGroup)
+        this.currentLayerGroup.remove();
+      this.currentLayerGroup = L.layerGroup()
       for (const list of this.state.activityPoints()) {
         var polyline = L.polyline(list, {
-          color: '#551281',
+          color: '#ffbb00',
           weight: 3,
-          opacity: 0.5,
+          opacity: this.state.transparency(),
           smoothFactor: 1,
           className: 'activity-line'
-        }).addTo(this.map);
-        console.log(list)
+        }).addTo(this.currentLayerGroup);
       }
+      this.currentLayerGroup.addTo(this.map);
     });
   }
 
@@ -37,9 +40,9 @@ export class Map {
       zoom: 15
     });
     // Add openstreetmap image
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://api.maptiler.com/maps/darkmatter/{z}/{x}/{y}.png?key=7YM5b5b7Yf0rqZ3g1pXC', {
         maxZoom: 19,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(this.map);
   }
   
