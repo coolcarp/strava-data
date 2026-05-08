@@ -16,11 +16,12 @@ export type Result = {
 export type Query = Map<string, Result>
 
 export type QueryConfig = {
+  data: File
+}
+
+export type DefaultCenter = {
   latitude: number,
   longitude: number,
-  day: string,
-  period: string,
-  roomCount: number
 }
 
 @Injectable({
@@ -29,16 +30,19 @@ export type QueryConfig = {
 export class State {
   public results = signal<Query>(new Map());
 
-  public queryModel = signal<QueryConfig>({
+  public center = signal<DefaultCenter>({
     latitude: 29.64802716074872,
     longitude: -82.350090444088,
-    day: "M",
-    period: "1",
-    roomCount: 10
+  });
+
+  public queryModel = signal<QueryConfig>({
+    data: new File([], "test")
   });
   public queryForm = form(this.queryModel, (schemaPath) => {
-    min(schemaPath.roomCount, 1)
-    required(schemaPath.latitude)
-    required(schemaPath.longitude)
+    // min(schemaPath.roomCount, 1)
+    required(schemaPath.data)
+    // required(schemaPath.longitude)
   });
+
+  public fitRecord = signal([]);
 }

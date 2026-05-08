@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { Output } from "../output/output";
 import { Config } from "../config/config";
 
 @Component({
   selector: 'app-sidebar',
-  imports: [Output, Config],
+  imports: [Config],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })

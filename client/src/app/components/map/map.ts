@@ -2,6 +2,8 @@ import { Component, effect, inject } from '@angular/core';
 import L, { DragEndEventHandlerFn, LatLngExpression, LatLngTuple, LayersControlEvent, LayersControlEventHandlerFn, LeafletEventHandlerFn, LeafletMouseEvent, LocationEvent } from 'leaflet';
 import { State } from '../../state';
 
+import 'leaflet.heat';
+
 @Component({
   selector: 'app-map',
   imports: [],
@@ -12,30 +14,23 @@ export class Map {
   private state = inject(State);
 
   private map: L.Map | undefined;
-  private fromPin: L.Marker | undefined;
+  private heatLayer: any | undefined;
 
   constructor() {
-    let markers: L.Marker[] = []
     effect(() => {
-      for (const marker of markers) {
-        marker.removeFrom(this.map!);
+      if (this.heatLayer) {
+        this.map.removeLayer(this.heatLayer);
       }
-      for (const [buildingId, result] of this.state.results().entries()) {
-        const marker = L.marker([result.lat, result.long]);
-        marker.addTo(this.map!);
-        marker.bindPopup(result.room.map(room => room.name).join('<br />'));
-        marker.bindTooltip(result.name);
-        markers.push(marker);
-      }
-    });
-    // Update fromPin pos 
-    effect(() => {
-      this.fromPin!.setLatLng([this.state.queryModel().latitude, this.state.queryModel().longitude]);
+      this.heatLayer = (L as any).heatLayer(this.state.fitRecord(), {
+        radius: 5, 
+        blur: 5,
+        maxZoom: 1
+      }).addTo(this.map);
     });
   }
 
   ngOnInit() {
-    const defaultCenter: LatLngExpression = [this.state.queryForm.latitude().value(), this.state.queryForm.longitude().value()];
+    const defaultCenter: LatLngExpression = [this.state.center().latitude, this.state.center().longitude];
     // Create map
     this.map = L.map('map', {
       center: defaultCenter,
@@ -46,27 +41,6 @@ export class Map {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(this.map);
-    // Make marker
-    this.fromPin = L.marker(defaultCenter, {
-      draggable: true
-    });
-    
-    this.fromPin.addTo(this.map);
-    this.fromPin.getElement()!.style.filter = "hue-rotate(100deg)"; // make red
-    // Connect click event
-    this.map.on('click', this.onMapClick.bind(this));
-    // Connect pin move event
-    this.fromPin.on('dragend', this.onPinDragEnd.bind(this))
-  }
-
-  private onMapClick(e: LeafletMouseEvent) {
-    this.state.queryForm.latitude().value.set(e.latlng.lat);
-    this.state.queryForm.longitude().value.set(e.latlng.lng);
-  }
-
-  private onPinDragEnd() {
-    this.state.queryForm.latitude().value.set(this.fromPin!.getLatLng().lat);
-    this.state.queryForm.longitude().value.set(this.fromPin!.getLatLng().lng);
   }
   
 }

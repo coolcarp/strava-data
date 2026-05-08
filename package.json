@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@garmin/fitsdk": "^21.202.0",
+    "@types/pako": "^2.0.4",
+    "jszip": "^3.10.1",
+    "leaflet.heat": "^0.2.0",
+    "pako": "^2.1.0",
+    "unzipper": "^0.12.3"
+  }
+}
