@@ -44,5 +44,5 @@ export class State {
     // required(schemaPath.longitude)
   });
 
-  public fitRecord = signal([]);
+  public activityPoints = signal([]);
 }

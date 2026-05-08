@@ -2,8 +2,6 @@ import { Component, effect, inject } from '@angular/core';
 import L, { DragEndEventHandlerFn, LatLngExpression, LatLngTuple, LayersControlEvent, LayersControlEventHandlerFn, LeafletEventHandlerFn, LeafletMouseEvent, LocationEvent } from 'leaflet';
 import { State } from '../../state';
 
-import 'leaflet.heat';
-
 @Component({
   selector: 'app-map',
   imports: [],
@@ -14,18 +12,20 @@ export class Map {
   private state = inject(State);
 
   private map: L.Map | undefined;
-  private heatLayer: any | undefined;
 
   constructor() {
     effect(() => {
-      if (this.heatLayer) {
-        this.map.removeLayer(this.heatLayer);
+      console.log(this.state.activityPoints())
+      for (const list of this.state.activityPoints()) {
+        var polyline = L.polyline(list, {
+          color: '#551281',
+          weight: 3,
+          opacity: 0.5,
+          smoothFactor: 1,
+          className: 'activity-line'
+        }).addTo(this.map);
+        console.log(list)
       }
-      this.heatLayer = (L as any).heatLayer(this.state.fitRecord(), {
-        radius: 5, 
-        blur: 5,
-        maxZoom: 1
-      }).addTo(this.map);
     });
   }
 
