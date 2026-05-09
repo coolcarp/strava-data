@@ -1,7 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, computed, effect, inject, model, signal } from '@angular/core';
 import { Query, State } from '../../state';
-import { form, Field, required, email } from '@angular/forms/signals'
 import { Decoder, Stream, Profile, Utils } from '@garmin/fitsdk';
 import JSZip from 'jszip';
 import { XMLParser } from "fast-xml-parser";
@@ -10,7 +9,7 @@ import { PercentPipe } from '@angular/common';
 
 @Component({
   selector: 'app-config',
-  imports: [Field, PercentPipe],
+  imports: [PercentPipe],
   templateUrl: './config.html',
   styleUrl: './config.css',
 })

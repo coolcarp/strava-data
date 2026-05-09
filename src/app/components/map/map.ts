@@ -2,6 +2,9 @@ import { Component, effect, inject } from '@angular/core';
 import L, { DragEndEventHandlerFn, LatLngExpression, LatLngTuple, LayersControlEvent, LayersControlEventHandlerFn, LeafletEventHandlerFn, LeafletMouseEvent, LocationEvent } from 'leaflet';
 import { State } from '../../state';
 
+import {Deck} from '@deck.gl/core';
+import {PathLayer} from '@deck.gl/layers';
+
 @Component({
   selector: 'app-map',
   imports: [],
@@ -16,19 +19,20 @@ export class Map {
 
   constructor() {
     effect(() => {
-      if (this.currentLayerGroup)
-        this.currentLayerGroup.remove();
-      this.currentLayerGroup = L.layerGroup()
-      for (const list of this.state.activityPoints()) {
-        var polyline = L.polyline(list, {
-          color: '#ffbb00',
-          weight: 3,
-          opacity: this.state.transparency(),
-          smoothFactor: 1,
-          className: 'activity-line'
-        }).addTo(this.currentLayerGroup);
-      }
-      this.currentLayerGroup.addTo(this.map);
+      // if (this.currentLayerGroup)
+      //   this.currentLayerGroup.remove();
+      // this.currentLayerGroup = L.layerGroup()
+      // for (const list of this.state.activityPoints()) {
+      //   var polyline = L.polyline(list, {
+      //     color: '#ffbb00',
+      //     weight: 3,
+      //     opacity: this.state.transparency(),
+      //     smoothFactor: 1,
+      //     className: 'activity-line'
+      //   }).addTo(this.currentLayerGroup);
+      // }
+      // this.currentLayerGroup.addTo(this.map);
+
     });
   }
 

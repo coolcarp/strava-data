@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "@garmin/fitsdk": "^21.202.0",
+    "@types/pako": "^2.0.4",
+    "deck.gl": "^9.3.2",
+    "events": "^3.3.0",
+    "fast-xml-parser": "^5.7.3",
+    "jszip": "^3.10.1",
+    "leaflet.heat": "^0.2.0",
+    "pako": "^2.1.0",
+    "unzipper": "^0.12.3",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^21.2.10"
+  }
+}
