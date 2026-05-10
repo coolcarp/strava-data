@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { form, min, required, schema } from '@angular/forms/signals';
 
 export type Room = {
@@ -45,9 +45,20 @@ export class State {
   });
 
   public activityPoints = signal([]);
+  public activityPointsDeck = computed(() => {
+    const points = this.activityPoints().flat();
+    return points.map(p => ({
+      position: [p[1], p[0]],
+      weight: 1
+    }))
+  });
 
   public totalActivities = signal(0);
   public currentActivity = signal(0);
 
-  public transparency = signal(0.1);
+  public threshold = signal(0.02);
+  public radius = signal(10);
+  public intensity = signal(1);
+
+  public mapZoom = signal(15);
 }

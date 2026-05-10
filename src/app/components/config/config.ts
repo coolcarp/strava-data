@@ -25,7 +25,7 @@ export class Config {
   }
 
   protected onTransparencyChanged(event) {
-    this.state.transparency.set(event.target.value);
+    this.state[event.target.id].set(event.target.value);
     console.log(event.target.value)
   }
 
@@ -94,6 +94,8 @@ export class Config {
     this.state.totalActivities.set(Object.keys(zipContent.files).length);
     let activityPoints = [];
     for (const [filename, zipEntry] of Object.entries(zipContent.files)) {
+      this.state.currentActivity.update((v) => {return v + 1});
+
       if (zipEntry.dir) continue;
       const content = await zipEntry.async('arraybuffer');
       if (!filename.startsWith('activities')) continue;
@@ -106,7 +108,6 @@ export class Config {
       } else if (filename.endsWith('.tcx.gz')) {
         activityPoints.push(await this.fromTcxGz(content));
       }
-      this.state.currentActivity.update((v) => {return v + 1});
     }
     this.state.activityPoints.set(activityPoints);
     console.log("Time taken:", Date.now() - start); // Time taken: 8445
