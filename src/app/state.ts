@@ -56,9 +56,11 @@ export class State {
   public totalActivities = signal(0);
   public currentActivity = signal(0);
 
-  public threshold = signal(0.02);
-  public radius = signal(10);
-  public intensity = signal(1);
+  public config = signal({
+    intensity: 1,
+    threshold: 0.02,
+    radius: 10,
+    mapZoom: 15,
+  });
 
-  public mapZoom = signal(15);
 }

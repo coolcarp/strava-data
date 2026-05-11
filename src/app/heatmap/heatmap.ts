@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { MapA } from "../components/map/map";
-import { Sidebar } from "../components/sidebar/sidebar";
+
+import { Overlay } from "../components/overlay/overlay";
 
 @Component({
   selector: 'app-heatmap',
-  imports: [MapA, Sidebar],
+  imports: [MapA, Overlay],
   templateUrl: './heatmap.html',
   styleUrl: './heatmap.css',
 })

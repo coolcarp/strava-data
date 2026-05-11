@@ -53,16 +53,16 @@ export class MapA {
       getPosition: d => d.position,
       getWeight: d => d.weight,
 
-      radiusPixels: Math.max(5, Math.min(50, this.state.radius() / Math.pow(2, 15 - this.state.mapZoom()))),
-      intensity: this.state.intensity(),
-      threshold: this.state.threshold()
+      radiusPixels: Math.max(5, Math.min(50, this.state.config().radius / Math.pow(2, 15 - this.state.config().mapZoom))),
+      intensity: this.state.config().intensity,
+      threshold: this.state.config().threshold
     });
 
     this.deckLayer.setProps({
       layers: [layer]
     });
     
-    console.log("zoom", this.state.mapZoom(), "\npower:", 15 - this.state.mapZoom(), "\ntotal:", Math.pow(2, 15 - this.state.mapZoom()))
+    console.log("zoom", this.state.config().mapZoom, "\npower:", 15 - this.state.config().mapZoom, "\ntotal:", Math.pow(2, 15 - this.state.config().mapZoom))
   }
 
   constructor() {
@@ -77,11 +77,13 @@ export class MapA {
     // Create map
     this.map = L.map('map', {
       center: defaultCenter,
-      zoom: this.state.mapZoom()
+      zoom: this.state.config().mapZoom
     });
     this.map.addEventListener("zoom", (e) => {
       console.log("setting zoom")
-      this.state.mapZoom.set(this.map.getZoom());
+      this.state.config.update((v) => {
+        return {...v, mapZoom: this.map.getZoom()}
+      });
     });
     // Add openstreetmap image
     L.tileLayer('https://api.maptiler.com/maps/darkmatter/{z}/{x}/{y}.png?key=7YM5b5b7Yf0rqZ3g1pXC', {

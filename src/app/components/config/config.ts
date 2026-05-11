@@ -25,8 +25,10 @@ export class Config {
   }
 
   protected onTransparencyChanged(event) {
-    this.state[event.target.id].set(event.target.value);
-    console.log(event.target.value)
+    this.state.config.update((v) => {
+      return {...v, [event.target.id]: event.target.value}
+    });
+    console.log(event.target.id, event.target.value)
   }
 
   private readonly textDecoder = new TextDecoder();

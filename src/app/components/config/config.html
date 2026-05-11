@@ -1,11 +1,12 @@
 <div>
+  <h2>Configuration</h2>
   <label>Import data:</label>
   <input id="data" type="file" (change)="onFileSelected($event)">
   <label>threshold:</label>
-  <input id="threshold" type="range" min="0" max="1" step="0.01" value="{{this.state.threshold()}}" (change)="onTransparencyChanged($event)">
+  <input id="threshold" type="range" min="0" max="1" step="0.01" value="{{this.state.config().threshold}}" (change)="onTransparencyChanged($event)">
   <label>radius:</label>
-  <input id="radius" type="range" min="0" max="100" step="1" value="{{this.state.radius()}}" (change)="onTransparencyChanged($event)">
+  <input id="radius" type="range" min="0" max="100" step="1" value="{{this.state.config().radius}}" (change)="onTransparencyChanged($event)">
   <label>intensity:</label>
-  <input id="intensity" type="range" min="0" max="1" step="0.01" value="{{this.state.intensity()}}" (change)="onTransparencyChanged($event)">
+  <input id="intensity" type="range" min="0" max="1" step="0.01" value="{{this.state.config().intensity}}" (change)="onTransparencyChanged($event)">
   <label>PROGRESS: {{this.ratio() | percent}}</label>
 </div>
