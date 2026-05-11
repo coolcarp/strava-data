@@ -1,4 +1,4 @@
-<form (submit)="onSubmit($event)">
+<div>
   <label>Import data:</label>
   <input id="data" type="file" (change)="onFileSelected($event)">
   <label>threshold:</label>
@@ -8,4 +8,4 @@
   <label>intensity:</label>
   <input id="intensity" type="range" min="0" max="1" step="0.01" value="{{this.state.intensity()}}" (change)="onTransparencyChanged($event)">
   <label>PROGRESS: {{this.ratio() | percent}}</label>
-</form>
+</div>

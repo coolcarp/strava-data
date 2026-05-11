@@ -1,11 +1,9 @@
 import { Component, inject, model, signal, ViewChild } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { MapA } from "./components/map/map";
-import { Sidebar } from "./components/sidebar/sidebar";
+import { RouterOutlet, Routes } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MapA, Sidebar],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
