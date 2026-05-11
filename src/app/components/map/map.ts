@@ -1,11 +1,11 @@
 import { Component, effect, inject } from '@angular/core';
-import L, { DragEndEventHandlerFn, LatLngExpression, LatLngTuple, LayersControlEvent, LayersControlEventHandlerFn, LeafletEventHandlerFn, LeafletMouseEvent, LocationEvent } from 'leaflet';
 import { State } from '../../state';
 
 import {color, Deck} from '@deck.gl/core';
 import { HeatmapLayer } from '@deck.gl/aggregation-layers';
 import {MapView} from '@deck.gl/core';
-import {LeafletLayer} from 'deck.gl-leaflet';
+import maplibregl from 'maplibre-gl';
+import {MapboxOverlay} from '@deck.gl/mapbox';
 
 @Component({
   selector: 'app-map',
@@ -16,26 +16,26 @@ import {LeafletLayer} from 'deck.gl-leaflet';
 export class MapA {
   private state = inject(State);
 
-  private map: L.Map | undefined;
-  private currentLayerGroup: L.LayerGroup | undefined;
-  private deckLayer;
+  private map;
+  private currentLayerGroup;
+  private deckOverlay;
 
-  protected createRouteLinesLeaflet() {
-    if (this.currentLayerGroup)
-      this.currentLayerGroup.remove();
-    this.currentLayerGroup = L.layerGroup()
-    for (const list of this.state.activityPoints()) {
-      var polyline = L.polyline(list, {
-        color: '#00ffbf',//'#ffbb00',
-        weight: 3,
-        //opacity: 0.1,//this.state.transparency(), // TODO try gl segments instead, low opactiy, no additive color.
-        smoothFactor: 1,
-        className: 'activity-line'
-      }).addTo(this.currentLayerGroup);
-    }
-    //this.currentLayerGroup.addTo(this.map);
-    this.map.addLayer(this.currentLayerGroup);
-  }
+  // protected createRouteLinesLeaflet() {
+  //   if (this.currentLayerGroup)
+  //     this.currentLayerGroup.remove();
+  //   this.currentLayerGroup = L.layerGroup()
+  //   for (const list of this.state.activityPoints()) {
+  //     var polyline = L.polyline(list, {
+  //       color: '#00ffbf',//'#ffbb00',
+  //       weight: 3,
+  //       //opacity: 0.1,//this.state.transparency(), // TODO try gl segments instead, low opactiy, no additive color.
+  //       smoothFactor: 1,
+  //       className: 'activity-line'
+  //     }).addTo(this.currentLayerGroup);
+  //   }
+  //   //this.currentLayerGroup.addTo(this.map);
+  //   this.map.addLayer(this.currentLayerGroup);
+  // }
 
   protected createRouteHeatmap() {
     const layer = new HeatmapLayer({
@@ -58,7 +58,7 @@ export class MapA {
       threshold: this.state.config().threshold
     });
 
-    this.deckLayer.setProps({
+    this.deckOverlay.setProps({
       layers: [layer]
     });
     
@@ -72,29 +72,28 @@ export class MapA {
   }
 
   ngOnInit() {
-    const defaultCenter: LatLngExpression = [this.state.center().latitude, this.state.center().longitude];
+    const defaultCenter: [number, number] = [this.state.center().longitude, this.state.center().latitude];
 
     // Create map
-    this.map = L.map('map', {
+    this.map = new maplibregl.Map({
+      style: 'https://tiles.openfreemap.org/styles/dark',
       center: defaultCenter,
-      zoom: this.state.config().mapZoom
+      zoom: this.state.config().mapZoom,
+      container: 'map',
+      attributionControl: false,
     });
-    this.map.addEventListener("zoom", (e) => {
+    this.map.on("zoomend", (e) => {
       console.log("setting zoom")
       this.state.config.update((v) => {
         return {...v, mapZoom: this.map.getZoom()}
       });
     });
-    // Add openstreetmap image
-    L.tileLayer('https://api.maptiler.com/maps/darkmatter/{z}/{x}/{y}.png?key=7YM5b5b7Yf0rqZ3g1pXC', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-    }).addTo(this.map);
-    // Add decklayer for overlays
-    this.deckLayer = new LeafletLayer({
+
+    this.deckOverlay = new MapboxOverlay({
+      interleaved: true,
       layers: []
     });
-    this.map.addLayer(this.deckLayer);
+    this.map.addControl(this.deckOverlay);
   }
   
 }
