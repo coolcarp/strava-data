@@ -1,8 +1,8 @@
 :host {
   width: 200px;
-  margin: 50px;
+  margin: 20px;
   border-radius: 5px;
-  background-color: #ffffff;
+  background-color: #20201e;
   display: block;
   pointer-events: all;
 }
@@ -16,6 +16,7 @@ div {
 }
 
 label {
+  color: rgb(255, 166, 0);
   font-weight: 600;
 }
 
@@ -28,7 +29,7 @@ input[type="number"], select {
 input[type="submit"], input[type="button"] {
   border-radius: 5px;
   border: none;
-  background-color: blueviolet;
+  background-color: rgb(214, 167, 81);
   font-weight: bold;
   color: white;
   padding: 5px;
@@ -42,4 +43,5 @@ input[type="button"] {
 h2 {
   margin: 0;
   text-align: center;
+  color: white;
 }

@@ -1,0 +1,12 @@
+@if (!this.state.importFinished()) {
+    <app-upload
+        (onFileUploaded)="this.state.parseStravaBackup($event)"
+        acceptable=".zip">
+    </app-upload>
+}
+<app-overlay>
+    @if (this.state.importFinished()) {
+        <app-config></app-config>
+    }
+</app-overlay>
+<app-map dataReady="createHeatmap"></app-map>

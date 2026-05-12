@@ -1,0 +1,22 @@
+<div class="input"
+    (click)="fileInput.click()">
+    <!-- (dragover)="onDragOver($event)" 
+    (drop)="onDrop($event)" 
+    (mouseenter)="focusClickArea($event,true)" 
+    (mouseleave)="focusClickArea($event,false)" 
+    (paste)="onPaste($event)"
+> //TODO--> 
+    @if (!importing()) {
+        <p class="main">Import a file to get started!</p>
+    } @else {
+        <p class="main">Importing...</p>
+    } 
+    <div style="top:0; left: 0;" class="corner"></div>
+    <div style="bottom:0; left: 0; rotate: -90deg" class="corner"></div>
+    <div style="top:0; right: 0; rotate: 90deg" class="corner"></div>
+    <div style="bottom:0; right: 0; rotate: 180deg" class="corner"></div>
+</div>
+<input #fileInput hidden id="data" type="file" [accept]="acceptable()" (change)="onFileSelected($event)">
+<div class="progress" [style.width]="this.state.ratio() | percent: '.3'">
+    
+</div>

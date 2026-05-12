@@ -1,11 +1,11 @@
-import { Component, effect, inject } from '@angular/core';
+import { Component, effect, inject, input } from '@angular/core';
 import { State } from '../../state';
 
-import {color, Deck} from '@deck.gl/core';
+import {Deck} from '@deck.gl/core';
 import { HeatmapLayer } from '@deck.gl/aggregation-layers';
-import {MapView} from '@deck.gl/core';
 import maplibregl from 'maplibre-gl';
 import {MapboxOverlay} from '@deck.gl/mapbox';
+import {LineLayer, PathLayer} from '@deck.gl/layers';
 
 @Component({
   selector: 'app-map',
@@ -17,31 +17,15 @@ export class MapA {
   private state = inject(State);
 
   private map;
-  private currentLayerGroup;
   private deckOverlay;
 
-  // protected createRouteLinesLeaflet() {
-  //   if (this.currentLayerGroup)
-  //     this.currentLayerGroup.remove();
-  //   this.currentLayerGroup = L.layerGroup()
-  //   for (const list of this.state.activityPoints()) {
-  //     var polyline = L.polyline(list, {
-  //       color: '#00ffbf',//'#ffbb00',
-  //       weight: 3,
-  //       //opacity: 0.1,//this.state.transparency(), // TODO try gl segments instead, low opactiy, no additive color.
-  //       smoothFactor: 1,
-  //       className: 'activity-line'
-  //     }).addTo(this.currentLayerGroup);
-  //   }
-  //   //this.currentLayerGroup.addTo(this.map);
-  //   this.map.addLayer(this.currentLayerGroup);
-  // }
+  public dataReady = input<string>();
 
-  protected createRouteHeatmap() {
+  protected createHeatmap() {
     const layer = new HeatmapLayer({
       id: 'heat',
 
-      data: this.state.activityPointsDeck(),
+      data: this.state.heatmapPointsDeck(),
       colorRange: [
         [179,88,6],
         [241,163,64],
@@ -65,10 +49,34 @@ export class MapA {
     console.log("zoom", this.state.config().mapZoom, "\npower:", 15 - this.state.config().mapZoom, "\ntotal:", Math.pow(2, 15 - this.state.config().mapZoom))
   }
 
+  protected createActivity() {
+    const layer = new LineLayer({
+      id: 'LineLayer',
+      data: this.state.activity() as any,
+      
+      getColor: d => [10 * d.msg.speed, 0, 0],
+      getSourcePosition: d => d.from,
+      getTargetPosition: d => d.to,
+      getWidth: 5,
+      pickable: false
+    });
+
+    this.deckOverlay.setProps({
+      layers: [layer]
+    });
+  }
+
   constructor() {
     effect(() => {
-      this.createRouteHeatmap(); //TODO this should only be done for the heatmap route OBVS
-    });
+      this[this.dataReady()]();
+    })
+    // effect(() => {
+    //   this.createHeatmap(); //TODO this should only be done for the heatmap route OBVS
+    // });
+
+    // effect(() => {
+    //   this.createActivity();
+    // });
   }
 
   ngOnInit() {
