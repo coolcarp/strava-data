@@ -53,23 +53,27 @@ export class MapA {
   protected createActivity() {
     const tolerance = 0.00001 * (Math.pow(2, 15 - this.state.config().mapZoom));
     console.log(tolerance)
-    const activity = this.state.activity();
+    const activity: any = this.state.activity();
     const simplifiedMsgs = simplify(activity.recordMesgs, tolerance);
     const segments = this.state.msgsToSegs(simplifiedMsgs);
     console.log(segments);
 
+    const tempRatio =  d => (d.msg.temperature - activity.sessionMesgs[0].minTempurature ) / (activity.sessionMesgs[0].maxTempurature - activity.sessionMesgs[0].minTempurature);
+    const speedRatio = d => d.msg.speed / activity.sessionMesgs[0].maxSpeed;
+    const hrRatio = d => (d.msg.heartRate - activity.sessionMesgs[0].avgHeartRate) / (activity.sessionMesgs[0].maxHeartRate - activity.sessionMesgs[0].avgHeartRate);
     const layer = new LineLayer({
       id: 'LineLayer',
       data: segments, //this.state.activity() as any,
       
-      getColor: d => [255, 255, 255 - 10 * d.msg.speed],
+      getColor: d => [255, 255 * hrRatio(d), 255 * hrRatio(d)],
+      //getColor: d => [255 * tempRatio(d), 255 * tempRatio(d), 0],
       getSourcePosition: d => d.from,
       getTargetPosition: d => d.to,
       getWidth: 10,
       widthUnits: 'meters',
       widthMinPixels: 5,
       widthMaxPixels: 20,
-      pickable: false
+      pickable: true,
     });
 
     this.deckOverlay.setProps({
@@ -110,7 +114,8 @@ export class MapA {
 
     this.deckOverlay = new MapboxOverlay({
       interleaved: true,
-      layers: []
+      layers: [],
+      getTooltip: ({object}) => object && `Heartrate: ${Math.round(object.msg.heartRate)} BPM`
     });
     this.map.addControl(this.deckOverlay);
   }

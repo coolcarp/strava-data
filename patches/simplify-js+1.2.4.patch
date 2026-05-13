@@ -14,7 +14,7 @@ index b2bf7af..53b2a40 100644
  
  declare function simplify (points: Point[], tolerance?: number, highQuality?: boolean): Point[];
 diff --git a/node_modules/simplify-js/simplify.js b/node_modules/simplify-js/simplify.js
-index 339c84f..845ac3a 100644
+index 339c84f..8ab45c4 100644
 --- a/node_modules/simplify-js/simplify.js
 +++ b/node_modules/simplify-js/simplify.js
 @@ -12,8 +12,8 @@
@@ -54,7 +54,7 @@ index 339c84f..845ac3a 100644
  
          } else if (t > 0) {
              x += dx * t;
-@@ -40,8 +40,8 @@ function getSqSegDist(p, p1, p2) {
+@@ -40,39 +40,99 @@ function getSqSegDist(p, p1, p2) {
          }
      }
  
@@ -65,11 +65,153 @@ index 339c84f..845ac3a 100644
  
      return dx * dx + dy * dy;
  }
-@@ -101,7 +101,6 @@ function simplifyDouglasPeucker(points, sqTolerance) {
+ // rest of the code doesn't care about point format
+ 
++const AVERAGE_FIELDS = [
++    'heartRate',
++    'speed',
++    'cadence',
++    'power',
++    'temperature',
++    'altitude'
++];
++const MAX_DIST_SEGMENT = 500; // Meters
++
++function averagePoints(basePoint, points) {
++    if (!points.length) return basePoint;
++
++    const merged = { ...basePoint };
++    const all = [basePoint, ...points];
++
++    for (var i = 0; i < AVERAGE_FIELDS.length; i++) {
++        var field = AVERAGE_FIELDS[i];
++        var sum = 0;
++        var count = 0;
++
++        for (var j = 0; j < all.length; j++) {
++            var value = all[j][field];
++
++            if (typeof value === 'number') {
++                sum += value;
++                count++;
++            }
++        }
++
++        if (count) merged[field] = sum / count;
++    }
++
++    return merged;
++}
++
+ // basic distance-based simplification
+ function simplifyRadialDist(points, sqTolerance) {
+ 
+     var prevPoint = points[0],
+         newPoints = [prevPoint],
++        skipped = [],
++        accumulatedDistance = 0,
+         point;
+ 
+     for (var i = 1, len = points.length; i < len; i++) {
+         point = points[i];
+ 
+-        if (getSqDist(point, prevPoint) > sqTolerance) {
++        accumulatedDistance += point.distance - points[i - 1].distance;
++
++        if (
++            getSqDist(point, prevPoint) > sqTolerance ||
++            accumulatedDistance >= MAX_DIST_SEGMENT
++        ) {
++            newPoints[newPoints.length - 1] = averagePoints(prevPoint, skipped);
+             newPoints.push(point);
+             prevPoint = point;
++            skipped = [];
++            accumulatedDistance = 0;
++        } else {
++            skipped.push(point);
+         }
+     }
+ 
++    newPoints[newPoints.length - 1] = averagePoints(prevPoint, skipped);
++
+     if (prevPoint !== point) newPoints.push(point);
+ 
+     return newPoints;
+ }
+ 
+-function simplifyDPStep(points, first, last, sqTolerance, simplified) {
++function simplifyDPStep(points, first, last, sqTolerance, simplified, kept) {
+     var maxSqDist = sqTolerance,
+-        index;
++        index,
++        accumulatedDistance = 0;
+ 
+     for (var i = first + 1; i < last; i++) {
++
++        accumulatedDistance += points[i].distance - points[i - 1].distance;
++
++        if (accumulatedDistance >= MAX_DIST_SEGMENT) {
++            index = i;
++            maxSqDist = sqTolerance + 1;
++            break;
++        }
++
+         var sqDist = getSqSegDist(points[i], points[first], points[last]);
+ 
+         if (sqDist > maxSqDist) {
+@@ -82,9 +142,11 @@ function simplifyDPStep(points, first, last, sqTolerance, simplified) {
+     }
+ 
+     if (maxSqDist > sqTolerance) {
+-        if (index - first > 1) simplifyDPStep(points, first, index, sqTolerance, simplified);
++        kept[index] = true;
++
++        if (index - first > 1) simplifyDPStep(points, first, index, sqTolerance, simplified, kept);
+         simplified.push(points[index]);
+-        if (last - index > 1) simplifyDPStep(points, index, last, sqTolerance, simplified);
++        if (last - index > 1) simplifyDPStep(points, index, last, sqTolerance, simplified, kept);
+     }
+ }
+ 
+@@ -93,15 +155,38 @@ function simplifyDouglasPeucker(points, sqTolerance) {
+     var last = points.length - 1;
+ 
+     var simplified = [points[0]];
+-    simplifyDPStep(points, 0, last, sqTolerance, simplified);
++    var kept = { 0: true, [last]: true };
++
++    simplifyDPStep(points, 0, last, sqTolerance, simplified, kept);
+     simplified.push(points[last]);
+ 
+-    return simplified;
++    simplified.sort(function(a, b) {
++        return points.indexOf(a) - points.indexOf(b);
++    });
++
++    var averaged = [];
++
++    for (var i = 0; i < simplified.length; i++) {
++        var currentIndex = points.indexOf(simplified[i]);
++        var nextIndex = i < simplified.length - 1
++            ? points.indexOf(simplified[i + 1])
++            : points.length;
++
++        var skipped = [];
++
++        for (var j = currentIndex + 1; j < nextIndex; j++) {
++            if (!kept[j]) skipped.push(points[j]);
++        }
++
++        averaged.push(averagePoints(points[currentIndex], skipped));
++    }
++
++    return averaged;
+ }
  
  // both algorithms combined for awesome performance
  function simplify(points, tolerance, highestQuality) {
 -
++    console.log("1km max seg")
      if (points.length <= 2) return points;
  
      var sqTolerance = tolerance !== undefined ? tolerance * tolerance : 1;
