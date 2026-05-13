@@ -5,24 +5,6 @@ import { XMLParser } from 'fast-xml-parser';
 import { Decoder, Stream, Profile, Utils } from '@garmin/fitsdk';
 import JSZip from 'jszip';
 
-export type Room = {
-  id: string,
-  name: string
-}
-
-export type Result = {
-  lat: number,
-  long: number,
-  name: string,
-  room: Room[]
-}
-
-export type Query = Map<string, Result>
-
-export type QueryConfig = {
-  data: File
-}
-
 export type DefaultCenter = {
   latitude: number,
   longitude: number,
@@ -32,8 +14,6 @@ export type DefaultCenter = {
   providedIn: 'root',
 })
 export class State {
-  public results = signal<Query>(new Map());
-
   public importFinished = signal(false);
 
   public center = signal<DefaultCenter>({
@@ -42,7 +22,9 @@ export class State {
   });
 
   public heatmapPoints = signal([]);
-  public activity = signal({});
+  public activity = signal({
+    recordMesgs: []
+  });
 
   public heatmapPointsDeck = computed(() => {
     const points = this.heatmapPoints().flat(2);
@@ -106,20 +88,28 @@ export class State {
     return latLngPts;
   }
 
+  protected fitToStd(json) {
+    for (let i = 0; i < json.recordMesgs.length; i++) {
+      json.recordMesgs[i].positionLong = json.recordMesgs[i].positionLong * this.semiConst;
+      json.recordMesgs[i].positionLat = json.recordMesgs[i].positionLat * this.semiConst;
+    }
+    return json;
+  }
+
   private fitMsgValid(msg) {
     return msg.positionLong !== undefined
   }
 
-  private fitToSegs(json) {
+  public msgsToSegs(msgs) {
     let segs = [];
     let prevMsg = undefined;
-    for (const msg of json.recordMesgs) {
+    for (const msg of msgs) {
       const isValid = this.fitMsgValid(msg)
       if (prevMsg && isValid) {
         segs.push({
           msg: msg,
-          to: [msg.positionLong * this.semiConst, msg.positionLat * this.semiConst],
-          from: [prevMsg.positionLong * this.semiConst, prevMsg.positionLat * this.semiConst]
+          to: [msg.positionLong, msg.positionLat],
+          from: [prevMsg.positionLong, prevMsg.positionLat]
         })
       } 
       if (isValid) {
@@ -183,15 +173,15 @@ export class State {
     const filename = file.name;
     const content = await file.arrayBuffer();
     //console.log(`File: ${filename}, Size: ${content.byteLength}`);
-    let obj;
+    let std;
     if (filename.endsWith('.gpx')) {
-      obj = this.fromGpx(content);
+      std = this.fromGpx(content);
     } else if (filename.endsWith('.fit.gz')) {
-      obj = this.fitToSegs(await this.fromFitGz(content));
+      std = this.fitToStd(await this.fromFitGz(content));
     } else if (filename.endsWith('.tcx.gz')) {
-      obj = await this.fromTcxGz(content); // TODO make conversions to std format
+      std = await this.fromTcxGz(content); // TODO make conversions to std format
     }
-    this.activity.set(obj);
+    this.activity.set(std);
     this.importFinished.set(true);
   }
 

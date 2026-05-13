@@ -1,0 +1,75 @@
+diff --git a/node_modules/simplify-js/index.d.ts b/node_modules/simplify-js/index.d.ts
+index b2bf7af..53b2a40 100644
+--- a/node_modules/simplify-js/index.d.ts
++++ b/node_modules/simplify-js/index.d.ts
+@@ -1,6 +1,8 @@
+ interface Point {
+-	x: number;
+-	y: number;
++	recordMesgs: {
++		positionLat: number,
++		positionLong: number
++	};
+ }
+ 
+ declare function simplify (points: Point[], tolerance?: number, highQuality?: boolean): Point[];
+diff --git a/node_modules/simplify-js/simplify.js b/node_modules/simplify-js/simplify.js
+index 339c84f..845ac3a 100644
+--- a/node_modules/simplify-js/simplify.js
++++ b/node_modules/simplify-js/simplify.js
+@@ -12,8 +12,8 @@
+ // square distance between 2 points
+ function getSqDist(p1, p2) {
+ 
+-    var dx = p1.x - p2.x,
+-        dy = p1.y - p2.y;
++    var dx = p1.positionLong - p2.positionLong,
++        dy = p1.positionLat - p2.positionLat;
+ 
+     return dx * dx + dy * dy;
+ }
+@@ -21,18 +21,18 @@ function getSqDist(p1, p2) {
+ // square distance from a point to a segment
+ function getSqSegDist(p, p1, p2) {
+ 
+-    var x = p1.x,
+-        y = p1.y,
+-        dx = p2.x - x,
+-        dy = p2.y - y;
++    var x = p1.positionLong,
++        y = p1.positionLat,
++        dx = p2.positionLong - x,
++        dy = p2.positionLat - y;
+ 
+     if (dx !== 0 || dy !== 0) {
+ 
+-        var t = ((p.x - x) * dx + (p.y - y) * dy) / (dx * dx + dy * dy);
++        var t = ((p.positionLong - x) * dx + (p.positionLat - y) * dy) / (dx * dx + dy * dy);
+ 
+         if (t > 1) {
+-            x = p2.x;
+-            y = p2.y;
++            x = p2.positionLong;
++            y = p2.positionLat;
+ 
+         } else if (t > 0) {
+             x += dx * t;
+@@ -40,8 +40,8 @@ function getSqSegDist(p, p1, p2) {
+         }
+     }
+ 
+-    dx = p.x - x;
+-    dy = p.y - y;
++    dx = p.positionLong - x;
++    dy = p.positionLat - y;
+ 
+     return dx * dx + dy * dy;
+ }
+@@ -101,7 +101,6 @@ function simplifyDouglasPeucker(points, sqTolerance) {
+ 
+ // both algorithms combined for awesome performance
+ function simplify(points, tolerance, highestQuality) {
+-
+     if (points.length <= 2) return points;
+ 
+     var sqTolerance = tolerance !== undefined ? tolerance * tolerance : 1;

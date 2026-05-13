@@ -6,6 +6,7 @@ import { HeatmapLayer } from '@deck.gl/aggregation-layers';
 import maplibregl from 'maplibre-gl';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import {LineLayer, PathLayer} from '@deck.gl/layers';
+import simplify from 'simplify-js';
 
 @Component({
   selector: 'app-map',
@@ -50,14 +51,24 @@ export class MapA {
   }
 
   protected createActivity() {
+    const tolerance = 0.00001 * (Math.pow(2, 15 - this.state.config().mapZoom));
+    console.log(tolerance)
+    const activity = this.state.activity();
+    const simplifiedMsgs = simplify(activity.recordMesgs, tolerance);
+    const segments = this.state.msgsToSegs(simplifiedMsgs);
+    console.log(segments);
+
     const layer = new LineLayer({
       id: 'LineLayer',
-      data: this.state.activity() as any,
+      data: segments, //this.state.activity() as any,
       
-      getColor: d => [10 * d.msg.speed, 0, 0],
+      getColor: d => [255, 255, 255 - 10 * d.msg.speed],
       getSourcePosition: d => d.from,
       getTargetPosition: d => d.to,
-      getWidth: 5,
+      getWidth: 10,
+      widthUnits: 'meters',
+      widthMinPixels: 5,
+      widthMaxPixels: 20,
       pickable: false
     });
 
