@@ -1,12 +1,13 @@
 @if (!this.state.importFinished()) {
     <app-upload 
          (onFileUploaded)="this.state.parseActivity($event)"
-        acceptable=".fit,.tcx.gz,.fit.gz,.gpx">
+        acceptable=".fit,.tcx,.gpx,.gz,.zip">
     </app-upload>
 }
 <app-overlay>
     @if (this.state.importFinished()) {
         <p> GOOD JOB</p>
     }
+    <app-activity-config></app-activity-config>
 </app-overlay>
 <app-map dataReady="createActivity"></app-map>

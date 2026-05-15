@@ -51,25 +51,32 @@ export class MapA {
   }
 
   protected createActivity() {
-    const tolerance = 0.00001 * (Math.pow(2, 15 - this.state.config().mapZoom));
+    const tolerance = this.state.config().activity_resolution * (Math.pow(2, 15 - this.state.config().mapZoom));
     console.log(tolerance)
     const activity: any = this.state.activity();
+    console.log("activity", activity)
     const simplifiedMsgs = simplify(activity.recordMesgs, tolerance);
     const segments = this.state.msgsToSegs(simplifiedMsgs);
     console.log(segments);
 
     const tempRatio =  d => (d.msg.temperature - activity.sessionMesgs[0].minTempurature ) / (activity.sessionMesgs[0].maxTempurature - activity.sessionMesgs[0].minTempurature);
-    const speedRatio = d => d.msg.speed / activity.sessionMesgs[0].maxSpeed;
+    const speedRatio = d => d.msg.enhancedSpeed / activity.sessionMesgs[0].maxSpeed;
     const hrRatio = d => (d.msg.heartRate - activity.sessionMesgs[0].avgHeartRate) / (activity.sessionMesgs[0].maxHeartRate - activity.sessionMesgs[0].avgHeartRate);
     const layer = new LineLayer({
       id: 'LineLayer',
       data: segments, //this.state.activity() as any,
       
-      getColor: d => [255, 255 * hrRatio(d), 255 * hrRatio(d)],
+      getColor: d => this.state.config().activity_metric == "heartrate" ?  [255, 255 - 255 * hrRatio(d), 255 - 255 * hrRatio(d)]
+        : this.state.config().activity_metric == "power" ? [255, 255, 255]
+        : this.state.config().activity_metric == "speed" ? [255 * speedRatio(d)**2, 0, 255 - 255 * speedRatio(d)**2]
+        : this.state.config().activity_metric == "elevation" ? [255, 0, 255]
+        : this.state.config().activity_metric == "cadence" ? [0, 255, 255]
+        : this.state.config().activity_metric == "temperature" ? [255 * tempRatio(d), 255 * tempRatio(d), 255 * tempRatio(d)]
+        : [0, 255, 0],
       //getColor: d => [255 * tempRatio(d), 255 * tempRatio(d), 0],
       getSourcePosition: d => d.from,
       getTargetPosition: d => d.to,
-      getWidth: 10,
+      getWidth: this.state.config().activity_width,
       widthUnits: 'meters',
       widthMinPixels: 5,
       widthMaxPixels: 20,

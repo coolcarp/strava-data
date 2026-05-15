@@ -43,6 +43,10 @@ export class State {
     threshold: 0.02,
     radius: 10,
     mapZoom: 15,
+
+    activity_width: 10,
+    activity_resolution: 0.00001,
+    activity_metric: "heartrate",
   });
 
   private readonly textDecoder = new TextDecoder();
@@ -97,7 +101,7 @@ export class State {
   }
 
   private fitMsgValid(msg) {
-    return msg.positionLong !== undefined
+    return msg.positionLong !== undefined && !Number.isNaN(msg.positionLong) 
   }
 
   public msgsToSegs(msgs) {
@@ -139,6 +143,34 @@ export class State {
     return lngLngPts;
   }
 
+  protected async parseFile(content: ArrayBuffer, filename: string) {
+    console.log("fname", filename)
+    if (filename.endsWith(".zip")) {
+      const zip = new JSZip();
+      const zipContent = await zip.loadAsync(content);
+      const [newFilename, zipEntry] = Object.entries(zipContent.files)[0];
+      return this.parseFile(await zipEntry.async('arraybuffer'), newFilename)
+    } else if (filename.endsWith(".gz")) {
+      const decompressed = await this.decompressGzip(content);
+      return this.parseFile(decompressed, filename.substring(0, filename.length - 3));
+    } else if (filename.endsWith(".fit")) {
+      const decoder = new Decoder(Stream.fromByteArray(content));
+      const { messages, errors } = decoder.read();
+      console.log("FIT", messages)
+      return messages;
+    } else if (filename.endsWith(".tcx")) {
+      const text = this.textDecoder.decode(content);
+      const json = await this.parser.parse(text);
+      console.log("TCX", json)
+      return json;
+    } else if (filename.endsWith(".gpx")) {
+      const text = this.textDecoder.decode(content);
+      const json = await this.parser.parse(text);
+      console.log("GPX", json);
+      return json;
+    }
+  }
+
   public async parseStravaBackup(file: File) {
     const start = Date.now();
     const arrayBuffer = await file.arrayBuffer();
@@ -173,14 +205,9 @@ export class State {
     const filename = file.name;
     const content = await file.arrayBuffer();
     //console.log(`File: ${filename}, Size: ${content.byteLength}`);
-    let std;
-    if (filename.endsWith('.gpx')) {
-      std = this.fromGpx(content);
-    } else if (filename.endsWith('.fit.gz')) {
-      std = this.fitToStd(await this.fromFitGz(content));
-    } else if (filename.endsWith('.tcx.gz')) {
-      std = await this.fromTcxGz(content); // TODO make conversions to std format
-    }
+    const parsed = await this.parseFile(content, filename);
+    const std = this.fitToStd(parsed); // TODO format others to STD
+    console.log("Test", std);
     this.activity.set(std);
     this.importFinished.set(true);
   }
