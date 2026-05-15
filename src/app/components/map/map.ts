@@ -66,7 +66,7 @@ export class MapA {
       id: 'LineLayer',
       data: segments, //this.state.activity() as any,
       
-      getColor: d => this.state.config().activity_metric == "heartrate" ?  [255, 255 - 255 * hrRatio(d), 255 - 255 * hrRatio(d)]
+      getColor: d => this.state.config().activity_metric == "heartRate" ?  [255, 255 - 255 * hrRatio(d), 255 - 255 * hrRatio(d)]
         : this.state.config().activity_metric == "power" ? [255, 255, 255]
         : this.state.config().activity_metric == "speed" ? [255 * speedRatio(d)**2, 0, 255 - 255 * speedRatio(d)**2]
         : this.state.config().activity_metric == "elevation" ? [255, 0, 255]
@@ -122,7 +122,7 @@ export class MapA {
     this.deckOverlay = new MapboxOverlay({
       interleaved: true,
       layers: [],
-      getTooltip: ({object}) => object && `Heartrate: ${Math.round(object.msg.heartRate)} BPM`
+      getTooltip: ({object}) => object && `${this.state.config().activity_metric}: ${Math.round(object.msg[this.state.config().activity_metric])}` // TODO units
     });
     this.map.addControl(this.deckOverlay);
   }

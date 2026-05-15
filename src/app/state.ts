@@ -46,7 +46,7 @@ export class State {
 
     activity_width: 10,
     activity_resolution: 0.00001,
-    activity_metric: "heartrate",
+    activity_metric: "heartRate",
   });
 
   private readonly textDecoder = new TextDecoder();
