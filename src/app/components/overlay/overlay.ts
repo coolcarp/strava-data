@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { Config } from "../config/config";
 
 @Component({
   selector: 'app-overlay',
-  imports: [Config],
+  imports: [],
   templateUrl: './overlay.html',
   styleUrl: './overlay.css',
 })

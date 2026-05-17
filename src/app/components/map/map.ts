@@ -8,6 +8,41 @@ import {MapboxOverlay} from '@deck.gl/mapbox';
 import {LineLayer, PathLayer} from '@deck.gl/layers';
 import simplify from 'simplify-js';
 
+// Source - https://stackoverflow.com/a/17243070
+// Posted by Paul S., modified by community. See post 'Timeline' for change history
+// Retrieved 2026-05-16, License - CC BY-SA 3.0
+
+/* accepts parameters
+ * h  Object = {h:x, s:y, v:z}
+ * OR 
+ * h, s, v
+*/
+function HSVtoRGB(h, s, v): [number, number, number] {
+    var r, g, b, i, f, p, q, t;
+    if (arguments.length === 1) {
+        s = h.s, v = h.v, h = h.h;
+    }
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    return [
+        r * 255,
+        g * 255,
+        b * 255
+    ];
+}
+
+
 @Component({
   selector: 'app-map',
   imports: [],
@@ -59,19 +94,21 @@ export class MapA {
     const segments = this.state.msgsToSegs(simplifiedMsgs);
     console.log(segments);
 
-    const tempRatio =  d => (d.msg.temperature - activity.sessionMesgs[0].minTempurature ) / (activity.sessionMesgs[0].maxTempurature - activity.sessionMesgs[0].minTempurature);
+    const tempRatio =  d => (d.msg.temperature - activity.sessionMesgs[0].minTemperature) / (activity.sessionMesgs[0].maxTemperature - activity.sessionMesgs[0].minTemperature);
     const speedRatio = d => d.msg.enhancedSpeed / activity.sessionMesgs[0].maxSpeed;
     const hrRatio = d => (d.msg.heartRate - activity.sessionMesgs[0].avgHeartRate) / (activity.sessionMesgs[0].maxHeartRate - activity.sessionMesgs[0].avgHeartRate);
-    const layer = new LineLayer({
+    const powerRatio = d => d.msg.power / activity.sessionMesgs[0].maxPower;
+    const cadenceRatio = d => d.msg.cadence / activity.sessionMesgs[0].maxCadence;
+    const layer = new LineLayer({ // TODO outline layer, slightly bigger
       id: 'LineLayer',
       data: segments, //this.state.activity() as any,
       
       getColor: d => this.state.config().activity_metric == "heartRate" ?  [255, 255 - 255 * hrRatio(d), 255 - 255 * hrRatio(d)]
-        : this.state.config().activity_metric == "power" ? [255, 255, 255]
+        : this.state.config().activity_metric == "power" ? HSVtoRGB(powerRatio(d), 1, 1)
         : this.state.config().activity_metric == "speed" ? [255 * speedRatio(d)**2, 0, 255 - 255 * speedRatio(d)**2]
         : this.state.config().activity_metric == "elevation" ? [255, 0, 255]
-        : this.state.config().activity_metric == "cadence" ? [0, 255, 255]
-        : this.state.config().activity_metric == "temperature" ? [255 * tempRatio(d), 255 * tempRatio(d), 255 * tempRatio(d)]
+        : this.state.config().activity_metric == "cadence" ? HSVtoRGB(cadenceRatio(d), 1, 1)
+        : this.state.config().activity_metric == "temperature" ? [100 + 155 * tempRatio(d), 100 + 155 * tempRatio(d), 0]
         : [0, 255, 0],
       //getColor: d => [255 * tempRatio(d), 255 * tempRatio(d), 0],
       getSourcePosition: d => d.from,

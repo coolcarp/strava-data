@@ -5,7 +5,7 @@ import { State } from '../../state';
 
 @Component({
   selector: 'app-config',
-  imports: [PercentPipe],
+  imports: [],
   templateUrl: './config.html',
   styleUrl: './config.css',
 })
